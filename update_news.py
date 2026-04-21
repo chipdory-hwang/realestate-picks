@@ -74,10 +74,10 @@ def create_html(news_list):
             li {{ 
                 margin-bottom: 15px; padding: 18px; background: #fff; 
                 border: 1px solid #e1eedd; border-radius: 10px; 
-                box-sizing: border-box; position: relative;
+                box-sizing: border-box;
             }}
             
-            /* [상단 배치] PICK-넘버링 | 매체출처 (가운데 정렬) */
+            /* 상단: PICK-넘버링 | 매체출처 */
             .top-meta {{ 
                 display: flex; justify-content: center; align-items: center; 
                 gap: 8px; margin-bottom: 12px; 
@@ -92,23 +92,27 @@ def create_html(news_list):
                 border: 1px solid #d1e7dd; 
             }}
             
-            /* [중간 배치] 제목 */
+            /* 중간: 제목 */
             .title-area {{ text-align: center; margin-bottom: 15px; }}
             .news-title {{ 
                 text-decoration: none; color: #111; font-weight: bold; font-size: 1.1em; 
                 word-break: keep-all; line-height: 1.4; display: block;
             }}
             
-            /* [하단 배치] 원본확인 버튼 | 생쥐 캐릭터 */
+            /* 하단: 원본 확인 🐭 (가운데 정렬 및 통합 링크) */
             .bottom-area {{ 
-                display: flex; justify-content: space-between; align-items: flex-end; 
-                border-top: 1px dashed #e1eedd; padding-top: 10px;
+                display: flex; justify-content: center; align-items: center; 
+                border-top: 1px dashed #e1eedd; padding-top: 12px;
             }}
-            .origin-btn {{
+            .origin-link {{
                 text-decoration: none; color: #fff; background-color: #27ae60; 
-                padding: 5px 12px; font-size: 0.8em; border-radius: 20px; font-weight: bold;
+                padding: 4px 12px; border-radius: 20px; font-weight: bold;
+                display: flex; align-items: center; gap: 4px;
+                font-size: 0.75em; /* PICK 태그와 동일한 크기 */
+                transition: background 0.2s;
             }}
-            .mouse-char {{ font-size: 1.5em; }} /* 이모지로 생쥐 표현 (또는 이미지 태그 사용 가능) */
+            .origin-link:active {{ background-color: #1e8449; }}
+            .mouse-icon {{ font-size: 1.1em; }} /* 캐릭터 크기 조정 */
             
             footer {{ margin-top: 40px; font-size: 0.8em; color: #999; text-align: center; }}
         </style>
@@ -128,7 +132,7 @@ def create_html(news_list):
     """
     
     if not news_list:
-        html_content += '<li style="text-align: center; color: #27ae60;">소식을 수집하고 있습니다.</li>'
+        html_content += '<li style="text-align: center; color: #27ae60;">소식을 수집 중입니다.</li>'
     else:
         for i, news in enumerate(news_list, 1):
             html_content += f"""
@@ -141,8 +145,10 @@ def create_html(news_list):
                         <span class="news-title">{news['title']}</span>
                     </div>
                     <div class="bottom-area">
-                        <a href="{news['link']}" class="origin-btn" target="_blank">원본 확인하기</a>
-                        <span class="mouse-char">🐭</span>
+                        <a href="{news['link']}" class="origin-link" target="_blank">
+                            <span>원본 확인</span>
+                            <span class="mouse-icon">🐭</span>
+                        </a>
                     </div>
                 </li>\n"""
         
@@ -172,12 +178,4 @@ def send_email(html_body):
     try:
         with smtplib.SMTP('smtp.gmail.com', 587) as server:
             server.starttls()
-            server.login(email_user, email_pass)
-            server.send_message(msg)
-    except: pass
-
-if __name__ == "__main__":
-    news_data = get_news()
-    create_html(news_data)
-    if news_data:
-        send_email(create_html(news_data))
+            server.login(email_user, email_
