@@ -31,7 +31,7 @@ def get_news():
                 media = parts[1]
             else:
                 title = full_title
-                media = "뉴스"
+                media = "Media"
                 
             news_list.append({'title': title, 'link': link, 'media': media})
             
@@ -49,83 +49,85 @@ def create_html(news_list):
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Daily 부동산 Picks - Gold Edition</title>
+        <title>Daily 부동산 Picks - Prestige Gold</title>
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Serif+KR:wght@700&family=Noto+Sans+KR:wght@300;400;700&display=swap');
             
             body {{ 
                 font-family: 'Noto Sans KR', sans-serif; 
                 line-height: 1.8; 
-                color: #3d3d3d; 
+                color: #1a1a1a; 
                 max-width: 900px; 
                 margin: 0 auto; 
-                padding: 50px 20px; 
-                background-color: #f9f7f2; /* 연한 베이지 바탕 */
+                padding: 40px 20px; 
+                background-color: #111111; /* 다크 배경으로 금색 극대화 */
             }}
             .container {{ 
                 background: #ffffff; 
-                padding: 50px; 
-                border-radius: 5px; 
-                box-shadow: 0 20px 40px rgba(0,0,0,0.08); 
-                border-top: 12px solid #D4AF37; /* 골드 포인트 */
+                padding: 40px; 
+                border-radius: 0px; 
+                box-shadow: 0 0 50px rgba(184, 134, 11, 0.2); 
+                border: 1px solid #d4af37;
             }}
             
-            /* 상단 헤더 중앙 정렬 섹션 */
+            /* 헤더 섹션 중앙 정렬 및 간격 축소 */
             .header-section {{
                 text-align: center;
-                margin-bottom: 45px;
+                margin-bottom: 40px;
             }}
             h1 {{ 
-                font-family: 'Noto Serif KR', serif;
-                color: #aa8a2e; 
-                font-size: 2.8em;
-                margin-bottom: 5px;
+                font-family: 'Cinzel', serif; /* 럭셔리 영문 서체 혼용 가능 */
+                color: #996515; 
+                font-size: 3.2em;
+                margin: 0;
+                padding: 0;
+                line-height: 1.1;
                 display: inline-block;
-                border-bottom: 3px solid #D4AF37;
-                padding-bottom: 8px;
-                letter-spacing: -1px;
+                background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                border-bottom: 2px solid #d4af37;
             }}
             .sub-title {{
                 display: block;
-                color: #8a8a8a;
-                font-size: 1em;
-                margin-top: 15px;
-                font-weight: 400;
-                letter-spacing: 2px;
+                color: #b8860b;
+                font-size: 1.1em;
+                margin-top: 5px; /* 제목과의 간격 축소 */
+                font-weight: 700;
+                letter-spacing: 1px;
+            }}
+            .date-group {{
+                margin-top: 20px;
             }}
             .date {{ 
                 color: #666; 
-                font-size: 0.95em; 
-                margin-top: 25px;
-                margin-bottom: 5px;
+                font-size: 0.9em; 
+                margin: 0;
             }}
             .designer {{
-                font-size: 0.9em;
-                color: #D4AF37;
+                font-size: 0.85em;
+                color: #aa771c;
                 font-weight: 700;
-                margin-bottom: 10px;
                 display: block;
-                text-transform: uppercase;
-                letter-spacing: 1px;
+                margin-top: 5px;
+                letter-spacing: 2px;
             }}
             
-            /* 뉴스 리스트 섹션 */
-            ul {{ list-style: none; padding: 0; }}
+            /* 리스트 섹션 */
+            ul {{ list-style: none; padding: 0; margin-top: 30px; }}
             li {{ 
-                margin-bottom: 18px; 
-                padding: 22px; 
+                margin-bottom: 12px; 
+                padding: 15px 20px; 
                 background: #fff; 
-                border: 1px solid #eeebe0; 
-                border-radius: 0px; 
-                transition: all 0.3s ease;
+                border-bottom: 1px solid #f0e6cc; 
                 display: flex;
                 align-items: center;
-                justify-content: space-between; /* 양 끝 정렬 */
+                justify-content: space-between;
+                transition: all 0.3s ease;
             }}
             li:hover {{ 
-                background-color: #fffdf5;
-                border-color: #D4AF37;
-                transform: scale(1.01);
+                background-color: #fffaf0;
+                border-left: 5px solid #d4af37;
             }}
             
             .left-group {{
@@ -134,65 +136,65 @@ def create_html(news_list):
                 flex: 1;
             }}
             .tag-box {{ 
-                background: linear-gradient(135deg, #D4AF37, #F1D38A); 
-                color: #fff; 
-                padding: 6px 14px; 
-                font-size: 0.8em; 
+                background: #111; 
+                color: #d4af37; 
+                padding: 4px 10px; 
+                font-size: 0.75em; 
                 font-weight: bold;
-                margin-right: 20px;
-                min-width: 70px;
+                margin-right: 15px;
+                border: 1px solid #d4af37;
+                min-width: 60px;
                 text-align: center;
-                box-shadow: 2px 2px 8px rgba(212, 175, 55, 0.3);
             }}
             .news-link {{ 
                 text-decoration: none; 
-                color: #2c2c2c; 
+                color: #222; 
                 font-weight: 500; 
-                font-size: 1.15em;
+                font-size: 1.05em;
                 word-break: keep-all;
-                flex: 1;
             }}
-            .news-link:hover {{ color: #aa8a2e; }}
             
+            /* 매체 출처 가독성 강화 */
             .media-name {{
-                font-size: 0.85em;
-                color: #999;
+                font-size: 0.9em;
+                color: #111;
+                font-weight: 700;
                 margin-left: 20px;
                 white-space: nowrap;
-                border-left: 1px solid #ddd;
-                padding-left: 15px;
+                background-color: #fcf6ba;
+                padding: 2px 8px;
+                border-radius: 4px;
+                border: 1px solid #d4af37;
             }}
             
             footer {{ 
-                margin-top: 60px; 
-                font-size: 0.85em; 
-                color: #b3b3b3; 
+                margin-top: 50px; 
+                font-size: 0.8em; 
+                color: #999; 
                 text-align: center;
-                border-top: 1px solid #f0f0f0;
-                padding-top: 30px;
+                letter-spacing: 1px;
             }}
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header-section">
-                <h1>Daily「부동산」Picks</h1>
+                <h1>Daily 부동산 Picks</h1>
                 <span class="sub-title">(부동산/아파트/재건축/재개발/토지)</span>
-                <p class="date">📅 {now} UPDATE</p>
-                <span class="designer">Designed by chipdory.hwang</span>
+                <div class="date-group">
+                    <p class="date">📅 {now} UPDATE</p>
+                    <span class="designer">Designed by chipdory.hwang</span>
+                </div>
             </div>
             
-            <div class="content-section">
+            <ul>
     """
     
     if not news_list:
         html_content += """
-                <p style="padding: 40px; background: #fffdf5; color: #aa8a2e; text-align: center; border: 1px dashed #D4AF37;">
-                    현재 새로운 소식을 분석 중입니다. 잠시 후 다시 방문해 주세요.
-                </p>
+                <li style="justify-content: center; color: #b8860b;">데이터를 불러오는 중입니다.</li>
         """
     else:
-        html_content += "<ul>"
         for i, news in enumerate(news_list, 1):
             html_content += f"""
                 <li>
@@ -202,13 +204,11 @@ def create_html(news_list):
                     </div>
                     <span class="media-name">{news['media']}</span>
                 </li>\n"""
-        html_content += "</ul>"
         
     html_content += """
-            </div>
+            </ul>
             <footer>
-                PREMIUM REAL ESTATE NEWS CURATION<br>
-                본 리포트는 매일 오전 5시 18분에 업데이트됩니다.
+                PREMIUM CURATION SERVICE BY CHIPDORY HWANG
             </footer>
         </div>
     </body>
@@ -222,14 +222,12 @@ def create_html(news_list):
 def send_email(html_body):
     email_user = os.environ.get('EMAIL_USER')
     email_pass = os.environ.get('EMAIL_PASS')
-    
-    if not email_user or not email_pass:
-        return
+    if not email_user or not email_pass: return
 
     msg = MIMEMultipart()
     msg['From'] = email_user
     msg['To'] = email_user
-    msg['Subject'] = f"✨ [Daily 부동산 Picks] {datetime.date.today()} Gold 리포트"
+    msg['Subject'] = f"🏆 [Prestige Gold] {datetime.date.today()} 부동산 리포트"
     msg.attach(MIMEText(html_body, 'html'))
     
     try:
@@ -237,8 +235,7 @@ def send_email(html_body):
             server.starttls()
             server.login(email_user, email_pass)
             server.send_message(msg)
-    except Exception:
-        pass
+    except: pass
 
 if __name__ == "__main__":
     news_data = get_news()
