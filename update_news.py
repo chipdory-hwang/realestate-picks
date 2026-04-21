@@ -7,6 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 def get_news():
+    # 부동산 관련 핵심 키워드 검색
     search_query = '부동산 OR 아파트 OR 재건축 OR 재개발 OR 토지'
     url = f"https://news.google.com/rss/search?q={search_query}&hl=ko&gl=KR&ceid=KR:ko"
     
@@ -43,7 +44,6 @@ def create_html(news_list):
     now_full = (datetime.datetime.now() + datetime.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M')
     now_simple = (datetime.datetime.now() + datetime.timedelta(hours=9)).strftime('%m월 %d일')
     
-    # f-string 시작
     html_content = f"""
     <!DOCTYPE html>
     <html lang="ko">
@@ -51,7 +51,12 @@ def create_html(news_list):
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         
+        <!-- 파비콘 설정 (부동산 느낌 🏠) -->
+        <link rel="icon" href="https://fav.farm/🏠" />
+        
         <title>Daily「부동산」Picks</title>
+        
+        <!-- 공유 미리보기(OG) 설정 -->
         <meta name="description" content="{now_simple} 업데이트된 부동산 핵심 리포트">
         <meta property="og:type" content="website">
         <meta property="og:title" content="Daily「부동산」Picks">
@@ -166,7 +171,7 @@ def create_html(news_list):
     
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
-    print("✅ index.html 생성 완료")
+    print("✅ index.html 생성 완료 (Favicon: 🏠)")
     return html_content
 
 def send_email(html_body):
