@@ -7,7 +7,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 def get_news():
-    # 구글 뉴스 RSS 피드 (부동산 핵심 키워드 검색)
     search_query = '부동산 OR 아파트 OR 재건축 OR 재개발 OR 토지'
     url = f"https://news.google.com/rss/search?q={search_query}&hl=ko&gl=KR&ceid=KR:ko"
     
@@ -23,10 +22,19 @@ def get_news():
         
         items = soup.select('item')
         for item in items[:15]:
-            title = item.title.text
+            full_title = item.title.text
             link = item.link.text
-            clean_title = title.split(' - ')[0]
-            news_list.append({'title': clean_title, 'link': link})
+            
+            # 언론사 분리 (제목 - 언론사 형식)
+            if ' - ' in full_title:
+                parts = full_title.rsplit(' - ', 1)
+                title = parts[0]
+                media = parts[1]
+            else:
+                title = full_title
+                media = "뉴스"
+                
+            news_list.append({'title': title, 'link': link, 'media': media})
             
         return news_list
     except Exception as e:
@@ -34,7 +42,6 @@ def get_news():
         return []
 
 def create_html(news_list):
-    # 한국 시간 기준 시간 표시 (GitHub Actions 서버 시간 고려)
     now = (datetime.datetime.now() + datetime.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M')
     
     html_content = f"""
@@ -51,100 +58,124 @@ def create_html(news_list):
                 font-family: 'Noto Sans KR', sans-serif; 
                 line-height: 1.8; 
                 color: #2d3436; 
-                max-width: 800px; 
+                max-width: 850px; 
                 margin: 0 auto; 
                 padding: 40px 20px; 
-                background-color: #f0f7f4; 
+                background-color: #f2f9f4; 
             }}
             .container {{ 
                 background: #ffffff; 
-                padding: 40px; 
-                border-radius: 20px; 
-                box-shadow: 0 15px 35px rgba(46, 204, 113, 0.1); 
-                border-top: 8px solid #2ecc71;
+                padding: 45px; 
+                border-radius: 25px; 
+                box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+                border-top: 10px solid #48c774;
             }}
+            .header-group {{ margin-bottom: 35px; }}
             h1 {{ 
-                color: #27ae60; 
-                font-size: 2.2em;
-                margin-bottom: 10px;
-                letter-spacing: -1px;
-                display: flex;
-                align-items: center;
+                color: #234d32; 
+                font-size: 2.5em;
+                margin-bottom: 5px;
+                display: inline-block;
+                border-bottom: 4px solid #48c774; /* 제목 밑줄 */
+                padding-bottom: 5px;
             }}
-            h1 span {{ color: #2d3436; margin: 0 5px; }}
+            .sub-title {{
+                display: block;
+                color: #555;
+                font-size: 0.95em;
+                margin-top: 10px;
+                font-weight: 400;
+            }}
             .date {{ 
                 color: #7f8c8d; 
-                font-size: 0.95em; 
-                margin-bottom: 30px; 
-                padding-bottom: 15px;
-                border-bottom: 1px dashed #bddfc3;
+                font-size: 0.9em; 
+                margin-top: 20px;
+                margin-bottom: 5px;
+            }}
+            .designer {{
+                font-size: 0.85em;
+                color: #48c774;
+                font-weight: bold;
+                margin-bottom: 30px;
+                display: block;
             }}
             ul {{ list-style: none; padding: 0; }}
             li {{ 
                 margin-bottom: 15px; 
-                padding: 18px; 
+                padding: 20px; 
                 background: #fff; 
                 border: 1px solid #e1eedd; 
-                border-radius: 12px; 
-                transition: all 0.3s ease;
+                border-radius: 15px; 
+                transition: all 0.2s ease;
                 display: flex;
-                align-items: flex-start;
+                align-items: center;
             }}
             li:hover {{ 
-                transform: translateY(-3px); 
-                border-color: #2ecc71; 
-                box-shadow: 0 5px 15px rgba(46, 204, 113, 0.15);
+                transform: translateX(8px);
+                border-color: #48c774;
+                background-color: #f9fffb;
             }}
-            .tag {{ 
-                background: #2ecc71; 
+            .tag-box {{ 
+                background: #48c774; 
                 color: #fff; 
-                padding: 3px 10px; 
-                border-radius: 6px; 
+                padding: 5px 12px; 
+                border-radius: 8px; 
                 font-size: 0.75em; 
                 font-weight: bold;
-                margin-right: 12px;
-                margin-top: 4px;
-                white-space: nowrap;
+                margin-right: 15px;
+                min-width: 110px;
+                text-align: center;
+                box-shadow: 2px 2px 5px rgba(72, 199, 116, 0.2);
             }}
             a {{ 
                 text-decoration: none; 
                 color: #2d3436; 
                 font-weight: 500; 
-                font-size: 1.05em;
+                font-size: 1.1em;
                 word-break: keep-all;
             }}
-            a:hover {{ color: #27ae60; }}
+            a:hover {{ color: #1a7a3a; }}
             footer {{ 
-                margin-top: 50px; 
-                font-size: 0.85em; 
+                margin-top: 60px; 
+                font-size: 0.8em; 
                 color: #95a5a6; 
                 text-align: center;
-                line-height: 1.5;
+                border-top: 1px solid #eee;
+                padding-top: 20px;
             }}
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>Daily<span>「부동산」</span>Picks</h1>
-            <p class="date">📅 <b>{now}</b> 기준 최신 브리핑</p>
+            <div class="header-group">
+                <h1>Daily「부동산」Picks</h1>
+                <span class="sub-title">(부동산/아파트/재건축/재개발/토지)</span>
+            </div>
+            
+            <p class="date">📅 {now} 업데이트</p>
+            <span class="designer">Designed by chipdory.hwang</span>
     """
     
     if not news_list:
         html_content += """
-            <p style="padding: 20px; background: #ebf9f1; color: #27ae60; border-radius: 12px; text-align: center;">
-                현재 분석 중인 이슈가 없습니다. 잠시 후 다시 확인해주세요.
+            <p style="padding: 30px; background: #f0fdf4; color: #234d32; border-radius: 15px; text-align: center;">
+                현재 수집된 소식이 없습니다. 잠시 후 다시 확인해 주세요.
             </p>
         """
     else:
         html_content += "<ul>"
-        for news in news_list:
-            html_content += f"<li><span class='tag'>PICK</span><a href='{news['link']}' target='_blank'>{news['title']}</a></li>\n"
+        for i, news in enumerate(news_list, 1):
+            html_content += f"""
+            <li>
+                <div class="tag-box">PICK-{i} {news['media']}</div>
+                <a href='{news['link']}' target='_blank'>{news['title']}</a>
+            </li>\n"""
         html_content += "</ul>"
         
     html_content += """
             <footer>
-                본 리포트는 매일 오전 5시 18분에 자동 업데이트됩니다.<br>
-                © 2026 부동산 뉴스 큐레이션 시스템
+                본 서비스는 매일 오전 5시 18분에 자동으로 뉴스 큐레이션을 수행합니다.<br>
+                © 2026 Daily 부동산 Picks All Rights Reserved.
             </footer>
         </div>
     </body>
