@@ -1,22 +1,30 @@
-name: Daily Real Estate Updateon:schedule:# 한국 시간 오전 5시 18분 (UTC 20:18)- cron: '18 20 * * *'workflow_dispatch:permissions:contents: writejobs:build:runs-on: ubuntu-lateststeps:- name: Checkout codeuses: actions/checkout@v4  - name: Set up Python
-    uses: actions/setup-python@v5
-    with:
-      python-version: '3.10'
+name: Daily Real Estate Update
+on:
+  schedule:
+    - cron: '0 23 * * *'
+  workflow_dispatch:
 
-  - name: Install dependencies
-    run: pip install feedparser
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  - name: Run script
-    env:
-      PYTHONIOENCODING: utf-8
-      EMAIL_USER: ${{ secrets.EMAIL_USER }}
-      EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
-    run: python update_news.py
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-  - name: Commit and Push
-    run: |
-      git config --global user.name "github-actions[bot]"
-      git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      git add index.html
-      git commit -m "Real Estate Update (KST 05:18)" || echo "No changes to commit"
-      git push
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run script
+        run: python update_news.py
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          publish_branch: main
