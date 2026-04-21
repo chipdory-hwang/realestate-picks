@@ -21,7 +21,7 @@ def get_news():
         news_list = []
         
         items = soup.select('item')
-        for item in items[:15]:
+        for item in items[:12]: # 모바일 화면을 위해 12개로 소폭 조정
             full_title = item.title.text
             link = item.link.text
             
@@ -31,7 +31,7 @@ def get_news():
                 media = parts[1]
             else:
                 title = full_title
-                media = "Media"
+                media = "뉴스"
                 
             news_list.append({'title': title, 'link': link, 'media': media})
         return news_list
@@ -40,7 +40,7 @@ def get_news():
         return []
 
 def create_html(news_list):
-    now = (datetime.datetime.now() + datetime.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M')
+    now = (datetime.datetime.now() + datetime.timedelta(hours=9)).strftime('%m/%dd %H:%M')
     
     html_content = f"""
     <!DOCTYPE html>
@@ -48,87 +48,80 @@ def create_html(news_list):
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>Daily 부동산 Picks</title>
         <style>
             body {{ 
-                font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
-                line-height: 1.5; color: #333; max-width: 800px; margin: 0 auto; 
-                padding: 20px 15px; background-color: #f0f7f4; 
-                -webkit-text-size-adjust: none;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                line-height: 1.4; color: #333; margin: 0; padding: 10px; background-color: #f4f9f6; 
+                -webkit-text-size-adjust: 100%;
             }}
             .container {{ 
-                background: #ffffff; padding: 25px 20px; border-radius: 12px; 
-                box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 6px solid #2ecc71; 
+                background: #ffffff; padding: 15px 12px; border-radius: 10px; 
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 5px solid #2ecc71; 
             }}
-            .header-section {{ text-align: center; margin-bottom: 25px; }}
+            .header-section {{ text-align: center; margin-bottom: 15px; }}
             h1 {{ 
-                color: #27ae60; font-size: 1.8em; margin: 0; padding: 0; 
-                display: inline-block; border-bottom: 2px solid #2ecc71; padding-bottom: 3px; 
+                color: #27ae60; font-size: 1.4em; margin: 0; letter-spacing: -1px;
+                display: inline-block; border-bottom: 2px solid #2ecc71;
             }}
-            .sub-title {{ display: block; color: #555; font-size: 0.85em; margin-top: 8px; font-weight: bold; }}
-            .date-group {{ margin-top: 12px; }}
-            .date {{ color: #888; font-size: 0.8em; margin: 0; }}
-            .designer {{ font-size: 0.8em; color: #27ae60; font-weight: bold; display: block; margin-top: 2px; }}
+            .sub-title {{ display: block; color: #666; font-size: 0.75em; margin-top: 4px; font-weight: bold; }}
+            .date-info {{ color: #999; font-size: 0.7em; margin-top: 5px; }}
             
-            ul {{ list-style: none; padding: 0; margin-top: 20px; }}
+            ul {{ list-style: none; padding: 0; margin-top: 10px; }}
             li {{ 
-                margin-bottom: 10px; padding: 12px; background: #fff; border: 1px solid #e1eedd; 
-                border-radius: 8px; display: flex; flex-direction: column; transition: background 0.2s;
+                margin-bottom: 8px; padding: 10px; background: #fff; border: 1px solid #eef5f0; 
+                border-radius: 6px; display: block; transition: background 0.1s;
             }}
-            li:active {{ background-color: #f0fdf4; }}
+            li:active {{ background-color: #e8f5e9; }}
             
-            .left-group {{ display: flex; align-items: flex-start; margin-bottom: 6px; }}
-            .tag-box {{ 
-                background: #2ecc71; color: #fff; padding: 2px 8px; font-size: 0.7em; 
-                font-weight: bold; margin-right: 10px; border-radius: 4px; 
-                min-width: 45px; text-align: center; margin-top: 2px;
+            .title-area {{ display: flex; align-items: flex-start; margin-bottom: 4px; }}
+            .tag {{ 
+                background: #2ecc71; color: #fff; padding: 1px 5px; font-size: 0.65em; 
+                font-weight: bold; margin-right: 8px; border-radius: 3px; 
+                min-width: 32px; text-align: center; margin-top: 2px;
             }}
             .news-link {{ 
-                text-decoration: none; color: #333; font-weight: 500; font-size: 1.05em; 
-                word-break: keep-all; flex: 1; line-height: 1.4;
+                text-decoration: none; color: #222; font-weight: 500; font-size: 0.95em; 
+                word-break: keep-all; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
             }}
             
-            .media-info {{ display: flex; justify-content: flex-end; align-items: center; }}
+            .meta-area {{ display: flex; justify-content: flex-end; align-items: center; }}
             .media-name {{ 
-                font-size: 0.75em; color: #27ae60; font-weight: bold; 
-                background-color: #ebf9f1; padding: 2px 8px; border-radius: 4px; 
+                font-size: 0.7em; color: #27ae60; font-weight: bold; 
+                background-color: #f0faf4; padding: 1px 6px; border-radius: 3px; 
                 border: 1px solid #d1e7dd; 
             }}
             
-            footer {{ margin-top: 30px; font-size: 0.75em; color: #aaa; text-align: center; line-height: 1.4; }}
+            footer {{ margin-top: 20px; font-size: 0.65em; color: #bbb; text-align: center; }}
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header-section">
-                <h1>Daily「부동산」Picks</h1>
-                <span class="sub-title">(부동산/아파트/재건축/재개발/토지)</span>
-                <div class="date-group">
-                    <p class="date">📅 {now} UPDATE</p>
-                    <span class="designer">Designed by chipdory.hwang</span>
-                </div>
+                <h1>Daily 부동산 Picks</h1>
+                <span class="sub-title">부동산/아파트/재개발 핵심 요약</span>
+                <div class="date-info">📅 {now} UPDATE | By chipdory</div>
             </div>
             <ul>
     """
     
     if not news_list:
-        html_content += '<li style="text-align: center; color: #27ae60;">현재 업데이트된 소식이 없습니다.</li>'
+        html_content += '<li style="text-align: center; font-size: 0.9em; color: #27ae60;">소식이 없습니다.</li>'
     else:
         for i, news in enumerate(news_list, 1):
             html_content += f"""
                 <li>
-                    <div class="left-group">
-                        <div class="tag-box">P-{i}</div>
+                    <div class="title-area">
+                        <span class="tag">#{i}</span>
                         <a href='{news['link']}' class="news-link" target='_blank'>{news['title']}</a>
                     </div>
-                    <div class="media-info">
+                    <div class="meta-area">
                         <span class="media-name">{news['media']}</span>
                     </div>
                 </li>\n"""
         
     html_content += """
             </ul>
-            <footer>© 2026 Daily 부동산 Picks<br>All Rights Reserved.</footer>
+            <footer>© 2026 Daily 부동산 Picks</footer>
         </div>
     </body>
     </html>
@@ -136,7 +129,6 @@ def create_html(news_list):
     
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
-    print("✅ index.html 생성 완료")
     return html_content
 
 def send_email(html_body):
@@ -147,7 +139,7 @@ def send_email(html_body):
     msg = MIMEMultipart()
     msg['From'] = email_user
     msg['To'] = email_user
-    msg['Subject'] = f"🌿 [Daily 부동산 Picks] {datetime.date.today()} 리포트"
+    msg['Subject'] = f"🌿 [Picks] {datetime.date.today()} 부동산 리포트"
     msg.attach(MIMEText(html_body, 'html'))
     
     try:
