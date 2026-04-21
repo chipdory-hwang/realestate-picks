@@ -7,7 +7,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 def get_news():
-    # 네이버 부동산 뉴스 (주요 뉴스)
     url = "https://land.naver.com/news/main.naver"
     headers = {'User-Agent': 'Mozilla/5.0'}
     
@@ -16,12 +15,13 @@ def get_news():
         soup = BeautifulSoup(res.text, 'html.parser')
         news_list = []
         
-        # 주요 뉴스 리스트 추출
-        items = soup.select('.news_list li')[:10] # 상위 10개
+        items = soup.select('.news_list li')[:10]
         for item in items:
-            title = item.select_one('dt:not(.photo) a').text.strip()
-            link = "https://land.naver.com" + item.select_one('dt:not(.photo) a')['href']
-            news_list.append({'title': title, 'link': link})
+            link_tag = item.select_one('dt:not(.photo) a')
+            if link_tag:
+                title = link_tag.text.strip()
+                link = "https://land.naver.com" + link_tag['href']
+                news_list.append({'title': title, 'link': link})
         return news_list
     except Exception as e:
         print(f"뉴스 수집 중 에러 발생: {e}")
@@ -74,18 +74,18 @@ def send_email(html_body):
     email_pass = os.environ.get('EMAIL_PASS')
     
     if not email_user or not email_pass:
-        print("이메일 설정(Secrets)이 되어있지 않아 메일 발송을 건너뜁니다.")
+        print("이메일 설정(Secrets)이 누락되어 메일 발송을 건너뜁니다.")
         return
 
     msg = MIMEMultipart()
     msg['From'] = email_user
-    msg['To'] = email_user # 나에게 보내기
+    msg['To'] = email_user
     msg['Subject'] = f"🏠 [부동산 뉴스] {datetime.date.today()} 리포트"
     
     msg.attach(MIMEText(html_body, 'html'))
     
     try:
-        with smtplib.SMTP_HOST('smtp.gmail.com', 587) as server:
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
             server.starttls()
             server.login(email_user, email_pass)
             server.send_message(msg)
@@ -99,4 +99,4 @@ if __name__ == "__main__":
         html_text = create_html(news_data)
         send_email(html_text)
     else:
-        print("수집된 뉴스가 없어 작업을 중단합니다.")
+        print("뉴스를 가져오지 못했습니다.")
