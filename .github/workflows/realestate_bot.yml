@@ -2,8 +2,8 @@ name: Daily Real Estate Update
 
 on:
   schedule:
-    - cron: '0 23 * * *' # 한국시간 오전 8시
-  workflow_dispatch: # 수동 실행 버튼
+    - cron: '0 23 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -32,6 +32,16 @@ jobs:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
         run: python update_news.py
+
+      - name: Check if index.html exists
+        run: |
+          if [ -f "index.html" ]; then
+            echo "✅ index.html 파일이 성공적으로 생성되었습니다."
+            ls -l index.html
+          else
+            echo "❌ index.html 파일이 없습니다! 파이썬 스크립트를 확인해야 합니다."
+            exit 1
+          fi
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
