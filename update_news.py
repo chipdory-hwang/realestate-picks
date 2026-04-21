@@ -7,8 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 def get_news():
-    # 구글 뉴스 RSS 피드 활용 (부동산 관련 통합 검색어)
-    # 키워드: 부동산, 아파트, 재건축, 재개발, 토지
+    # 구글 뉴스 RSS 피드 (부동산 핵심 키워드 검색)
     search_query = '부동산 OR 아파트 OR 재건축 OR 재개발 OR 토지'
     url = f"https://news.google.com/rss/search?q={search_query}&hl=ko&gl=KR&ceid=KR:ko"
     
@@ -19,24 +18,24 @@ def get_news():
     try:
         res = requests.get(url, headers=headers, timeout=15)
         res.raise_for_status()
-        soup = BeautifulSoup(res.text, 'xml') # RSS는 XML 형식이므로 xml 파서 사용
+        soup = BeautifulSoup(res.text, 'xml')
         news_list = []
         
         items = soup.select('item')
-        for item in items[:15]: # 주요 뉴스 15개 수집
+        for item in items[:15]:
             title = item.title.text
             link = item.link.text
-            # 불필요한 출처 표시 제거 (예: - 연합뉴스)
             clean_title = title.split(' - ')[0]
             news_list.append({'title': clean_title, 'link': link})
             
         return news_list
     except Exception as e:
-        print(f"뉴스 피드 수집 중 상세 에러: {e}")
+        print(f"뉴스 수집 중 상세 에러: {e}")
         return []
 
 def create_html(news_list):
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+    # 한국 시간 기준 시간 표시 (GitHub Actions 서버 시간 고려)
+    now = (datetime.datetime.now() + datetime.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M')
     
     html_content = f"""
     <!DOCTYPE html>
@@ -44,42 +43,108 @@ def create_html(news_list):
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>부동산 이슈 브리핑</title>
+        <title>Daily 부동산 Picks</title>
         <style>
-            body {{ font-family: 'Malgun Gothic', sans-serif; line-height: 1.7; color: #333; max-width: 850px; margin: 0 auto; padding: 25px; background-color: #f8f9fa; }}
-            .container {{ background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
-            h1 {{ color: #2c3e50; border-left: 5px solid #e67e22; padding-left: 15px; margin-bottom: 5px; }}
-            .date {{ color: #7f8c8d; font-size: 0.95em; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 10px; }}
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
+            
+            body {{ 
+                font-family: 'Noto Sans KR', sans-serif; 
+                line-height: 1.8; 
+                color: #2d3436; 
+                max-width: 800px; 
+                margin: 0 auto; 
+                padding: 40px 20px; 
+                background-color: #f0f7f4; 
+            }}
+            .container {{ 
+                background: #ffffff; 
+                padding: 40px; 
+                border-radius: 20px; 
+                box-shadow: 0 15px 35px rgba(46, 204, 113, 0.1); 
+                border-top: 8px solid #2ecc71;
+            }}
+            h1 {{ 
+                color: #27ae60; 
+                font-size: 2.2em;
+                margin-bottom: 10px;
+                letter-spacing: -1px;
+                display: flex;
+                align-items: center;
+            }}
+            h1 span {{ color: #2d3436; margin: 0 5px; }}
+            .date {{ 
+                color: #7f8c8d; 
+                font-size: 0.95em; 
+                margin-bottom: 30px; 
+                padding-bottom: 15px;
+                border-bottom: 1px dashed #bddfc3;
+            }}
             ul {{ list-style: none; padding: 0; }}
-            li {{ margin-bottom: 12px; padding: 15px; background: #fff; border: 1px solid #e9ecef; border-radius: 8px; transition: transform 0.2s; }}
-            li:hover {{ transform: translateX(5px); border-color: #e67e22; }}
-            a {{ text-decoration: none; color: #34495e; font-weight: 600; font-size: 1.1em; }}
-            a:hover {{ color: #e67e22; }}
-            .tag {{ display: inline-block; background: #e67e22; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; margin-right: 8px; vertical-align: middle; }}
-            footer {{ margin-top: 40px; font-size: 0.85em; color: #bdc3c7; text-align: center; }}
+            li {{ 
+                margin-bottom: 15px; 
+                padding: 18px; 
+                background: #fff; 
+                border: 1px solid #e1eedd; 
+                border-radius: 12px; 
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: flex-start;
+            }}
+            li:hover {{ 
+                transform: translateY(-3px); 
+                border-color: #2ecc71; 
+                box-shadow: 0 5px 15px rgba(46, 204, 113, 0.15);
+            }}
+            .tag {{ 
+                background: #2ecc71; 
+                color: #fff; 
+                padding: 3px 10px; 
+                border-radius: 6px; 
+                font-size: 0.75em; 
+                font-weight: bold;
+                margin-right: 12px;
+                margin-top: 4px;
+                white-space: nowrap;
+            }}
+            a {{ 
+                text-decoration: none; 
+                color: #2d3436; 
+                font-weight: 500; 
+                font-size: 1.05em;
+                word-break: keep-all;
+            }}
+            a:hover {{ color: #27ae60; }}
+            footer {{ 
+                margin-top: 50px; 
+                font-size: 0.85em; 
+                color: #95a5a6; 
+                text-align: center;
+                line-height: 1.5;
+            }}
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>🏠 부동산 핵심 이슈 리포트</h1>
-            <p class="date">업데이트: {now} (부동산/아파트/재건축/토지)</p>
+            <h1>Daily<span>「부동산」</span>Picks</h1>
+            <p class="date">📅 <b>{now}</b> 기준 최신 브리핑</p>
     """
     
     if not news_list:
         html_content += """
-            <p style="padding: 20px; background: #fff5f5; color: #c0392b; border-radius: 8px;">
-                현재 뉴스를 불러올 수 없습니다. 시스템 로그를 확인해 주세요.
+            <p style="padding: 20px; background: #ebf9f1; color: #27ae60; border-radius: 12px; text-align: center;">
+                현재 분석 중인 이슈가 없습니다. 잠시 후 다시 확인해주세요.
             </p>
         """
     else:
         html_content += "<ul>"
         for news in news_list:
-            html_content += f"<li><span class='tag'>HOT</span><a href='{news['link']}' target='_blank'>{news['title']}</a></li>\n"
+            html_content += f"<li><span class='tag'>PICK</span><a href='{news['link']}' target='_blank'>{news['title']}</a></li>\n"
         html_content += "</ul>"
         
     html_content += """
             <footer>
-                본 리포트는 공개 뉴스 피드를 기반으로 AI가 자동 선별하여 제공합니다.
+                본 리포트는 매일 오전 5시 18분에 자동 업데이트됩니다.<br>
+                © 2026 부동산 뉴스 큐레이션 시스템
             </footer>
         </div>
     </body>
@@ -88,7 +153,6 @@ def create_html(news_list):
     
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
-    print("✅ index.html 생성 완료")
     return html_content
 
 def send_email(html_body):
@@ -96,13 +160,12 @@ def send_email(html_body):
     email_pass = os.environ.get('EMAIL_PASS')
     
     if not email_user or not email_pass:
-        print("이메일 설정이 없어 발송을 스킵합니다.")
         return
 
     msg = MIMEMultipart()
     msg['From'] = email_user
     msg['To'] = email_user
-    msg['Subject'] = f"🏠 [부동산 리포트] {datetime.date.today()} 주요 뉴스"
+    msg['Subject'] = f"🌿 [Daily 부동산 Picks] {datetime.date.today()} 리포트"
     msg.attach(MIMEText(html_body, 'html'))
     
     try:
