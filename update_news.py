@@ -7,6 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 def get_news():
+    # 부동산 관련 핵심 키워드 검색
     search_query = '부동산 OR 아파트 OR 재건축 OR 재개발 OR 토지'
     url = f"https://news.google.com/rss/search?q={search_query}&hl=ko&gl=KR&ceid=KR:ko"
     
@@ -40,7 +41,8 @@ def get_news():
         return []
 
 def create_html(news_list):
-    now = (datetime.datetime.now() + datetime.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M')
+    now_full = (datetime.datetime.now() + datetime.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M')
+    now_simple = (datetime.datetime.now() + datetime.timedelta(hours=9)).strftime('%m월 %d일')
     
     html_content = f"""
     <!DOCTYPE html>
@@ -49,13 +51,16 @@ def create_html(news_list):
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         
-        <!-- 링크 공유 미리보기(Open Graph) 설정 -->
+        <title>Daily「부동산」Picks</title>
+        <meta name="description" content="{now_simple} 업데이트된 부동산 핵심 리포트">
         <meta property="og:type" content="website">
         <meta property="og:title" content="Daily「부동산」Picks">
-        <meta property="og:description" content="{now} 업데이트된 부동산 핵심 뉴스 리포트">
+        <meta property="og:description" content="{now_simple} 부동산/아파트/재개발 주요 소식 모음">
         <meta property="og:image" content="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Mouse%20Face.png">
-        
-        <title>Daily 부동산 Picks</title>
+        <meta property="og:image:width" content="800">
+        <meta property="og:image:height" content="400">
+        <meta name="twitter:card" content="summary_large_image">
+
         <style>
             body {{ 
                 font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
@@ -96,95 +101,4 @@ def create_html(news_list):
                 background-color: #ebf9f1; padding: 2px 8px; border-radius: 4px; 
                 border: 1px solid #d1e7dd; 
             }}
-            .title-area {{ text-align: center; margin-bottom: 15px; }}
-            .news-title {{ 
-                text-decoration: none; color: #111; font-weight: bold; font-size: 1.1em; 
-                word-break: keep-all; line-height: 1.4; display: block;
-            }}
-            .bottom-area {{ 
-                display: flex; justify-content: center; align-items: center; 
-                border-top: 1px dashed #e1eedd; padding-top: 12px;
-            }}
-            .origin-link {{
-                text-decoration: none; color: #fff; background-color: #27ae60; 
-                padding: 4px 14px; border-radius: 20px; font-weight: bold;
-                display: flex; align-items: center; gap: 6px;
-                font-size: 0.75em;
-                transition: background 0.2s;
-            }}
-            .origin-link:active {{ background-color: #1e8449; }}
-            .mouse-icon {{ font-size: 1.1em; }}
-            
-            footer {{ margin-top: 40px; font-size: 0.8em; color: #999; text-align: center; }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header-section">
-                <h1>Daily「부동산」Picks</h1>
-                <span class="sub-title">(부동산/아파트/재건축/재개발/토지)</span>
-                <div class="date-group">
-                    <p class="date">📅 {now} UPDATE</p>
-                    <span class="designer">Designed by chipdory.hwang</span>
-                </div>
-            </div>
-            <ul>
-    """
-    
-    if not news_list:
-        html_content += '<li style="text-align: center; color: #27ae60;">소식을 수집 중입니다.</li>'
-    else:
-        for i, news in enumerate(news_list, 1):
-            html_content += f"""
-                <li>
-                    <div class="top-meta">
-                        <span class="tag-box">PICK-{i}</span>
-                        <span class="media-name">{news['media']}</span>
-                    </div>
-                    <div class="title-area">
-                        <span class="news-title">{news['title']}</span>
-                    </div>
-                    <div class="bottom-area">
-                        <a href="{news['link']}" class="origin-link" target="_blank">
-                            <span>원본 확인</span>
-                            <span class="mouse-icon">🐭</span>
-                        </a>
-                    </div>
-                </li>\n"""
-        
-    html_content += """
-            </ul>
-            <footer>© 2026 Daily 부동산 Picks - All Rights Reserved.</footer>
-        </div>
-    </body>
-    </html>
-    """
-    
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(html_content)
-    print("✅ index.html 생성 완료")
-    return html_content
-
-def send_email(html_body):
-    email_user = os.environ.get('EMAIL_USER')
-    email_pass = os.environ.get('EMAIL_PASS')
-    if not email_user or not email_pass: return
-
-    msg = MIMEMultipart()
-    msg['From'] = email_user
-    msg['To'] = email_user
-    msg['Subject'] = f"🌿 [Daily 부동산 Picks] {datetime.date.today()} 리포트"
-    msg.attach(MIMEText(html_body, 'html'))
-    
-    try:
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.starttls()
-            server.login(email_user, email_pass)
-            server.send_message(msg)
-    except: pass
-
-if __name__ == "__main__":
-    news_data = get_news()
-    full_html = create_html(news_data)
-    if news_data:
-        send_email(full_html)
+            .title-area {{ text-align: center; margin-bottom: 15px;
