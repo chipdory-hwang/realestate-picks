@@ -48,6 +48,14 @@ def create_html(news_list):
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        
+        <!-- 링크 공유 미리보기(Open Graph) 설정 -->
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="Daily「부동산」Picks">
+        <meta property="og:description" content="{now} 업데이트된 부동산 핵심 뉴스 리포트">
+        <meta property="og:image" content="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Mouse%20Face.png">
+        
+        <title>Daily 부동산 Picks</title>
         <style>
             body {{ 
                 font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
