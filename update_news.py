@@ -49,20 +49,17 @@ def create_html(news_list):
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <style>
-            /* 전체 배경 및 기본 폰트 */
             body {{ 
                 font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
                 line-height: 1.5; color: #333; margin: 0; padding: 10px; 
                 background-color: #f0f7f4; -webkit-text-size-adjust: 100%;
             }}
-            /* 모바일 꽉 차는 컨테이너 */
             .container {{ 
                 width: 100%; max-width: 600px; margin: 0 auto; box-sizing: border-box;
                 background: #ffffff; padding: 25px 15px; border-radius: 12px; 
                 box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 8px solid #2ecc71; 
             }}
             
-            /* 모든 상단 문구 가운데 정렬 */
             .header-section {{ text-align: center; margin-bottom: 25px; }}
             h1 {{ 
                 color: #27ae60; font-size: 1.6em; margin: 0; 
@@ -73,34 +70,45 @@ def create_html(news_list):
             .date {{ color: #7f8c8d; font-size: 0.85em; margin: 0; }}
             .designer {{ font-size: 0.85em; color: #27ae60; font-weight: bold; display: block; margin-top: 3px; }}
             
-            /* 뉴스 리스트 레이아웃 */
             ul {{ list-style: none; padding: 0; margin-top: 25px; }}
             li {{ 
-                margin-bottom: 12px; padding: 15px; background: #fff; 
+                margin-bottom: 15px; padding: 18px; background: #fff; 
                 border: 1px solid #e1eedd; border-radius: 10px; 
-                display: flex; flex-direction: column; /* 세로 배치로 모바일 최적화 */
-                transition: all 0.2s ease; box-sizing: border-box;
+                box-sizing: border-box; position: relative;
             }}
             
-            /* PICK 넘버링과 제목 영역 */
-            .top-area {{ display: flex; align-items: flex-start; margin-bottom: 8px; }}
+            /* [상단 배치] PICK-넘버링 | 매체출처 (가운데 정렬) */
+            .top-meta {{ 
+                display: flex; justify-content: center; align-items: center; 
+                gap: 8px; margin-bottom: 12px; 
+            }}
             .tag-box {{ 
-                background: #2ecc71; color: #fff; padding: 3px 8px; font-size: 0.75em; 
-                font-weight: bold; margin-right: 10px; border-radius: 4px; 
-                white-space: nowrap; flex-shrink: 0;
+                background: #2ecc71; color: #fff; padding: 2px 8px; font-size: 0.75em; 
+                font-weight: bold; border-radius: 4px; 
             }}
-            .news-link {{ 
-                text-decoration: none; color: #333; font-weight: 500; font-size: 1.05em; 
-                word-break: keep-all; line-height: 1.4;
-            }}
-            
-            /* 매체명 오른쪽 정렬 */
-            .bottom-area {{ display: flex; justify-content: flex-end; }}
             .media-name {{ 
                 font-size: 0.8em; color: #27ae60; font-weight: bold; 
                 background-color: #ebf9f1; padding: 2px 8px; border-radius: 4px; 
                 border: 1px solid #d1e7dd; 
             }}
+            
+            /* [중간 배치] 제목 */
+            .title-area {{ text-align: center; margin-bottom: 15px; }}
+            .news-title {{ 
+                text-decoration: none; color: #111; font-weight: bold; font-size: 1.1em; 
+                word-break: keep-all; line-height: 1.4; display: block;
+            }}
+            
+            /* [하단 배치] 원본확인 버튼 | 생쥐 캐릭터 */
+            .bottom-area {{ 
+                display: flex; justify-content: space-between; align-items: flex-end; 
+                border-top: 1px dashed #e1eedd; padding-top: 10px;
+            }}
+            .origin-btn {{
+                text-decoration: none; color: #fff; background-color: #27ae60; 
+                padding: 5px 12px; font-size: 0.8em; border-radius: 20px; font-weight: bold;
+            }}
+            .mouse-char {{ font-size: 1.5em; }} /* 이모지로 생쥐 표현 (또는 이미지 태그 사용 가능) */
             
             footer {{ margin-top: 40px; font-size: 0.8em; color: #999; text-align: center; }}
         </style>
@@ -120,17 +128,21 @@ def create_html(news_list):
     """
     
     if not news_list:
-        html_content += '<li style="text-align: center; color: #27ae60;">현재 새로운 소식을 수집 중입니다.</li>'
+        html_content += '<li style="text-align: center; color: #27ae60;">소식을 수집하고 있습니다.</li>'
     else:
         for i, news in enumerate(news_list, 1):
             html_content += f"""
                 <li>
-                    <div class="top-area">
-                        <div class="tag-box">PICK-{i}</div>
-                        <a href='{news['link']}' class="news-link" target='_blank'>{news['title']}</a>
+                    <div class="top-meta">
+                        <span class="tag-box">PICK-{i}</span>
+                        <span class="media-name">{news['media']}</span>
+                    </div>
+                    <div class="title-area">
+                        <span class="news-title">{news['title']}</span>
                     </div>
                     <div class="bottom-area">
-                        <span class="media-name">{news['media']}</span>
+                        <a href="{news['link']}" class="origin-btn" target="_blank">원본 확인하기</a>
+                        <span class="mouse-char">🐭</span>
                     </div>
                 </li>\n"""
         
