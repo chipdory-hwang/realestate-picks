@@ -59,7 +59,6 @@ def create_html(news_list):
                 background: #ffffff; padding: 25px 15px; border-radius: 12px; 
                 box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 8px solid #2ecc71; 
             }}
-            
             .header-section {{ text-align: center; margin-bottom: 25px; }}
             h1 {{ 
                 color: #27ae60; font-size: 1.6em; margin: 0; 
@@ -76,8 +75,6 @@ def create_html(news_list):
                 border: 1px solid #e1eedd; border-radius: 10px; 
                 box-sizing: border-box;
             }}
-            
-            /* 상단: PICK-넘버링 | 매체출처 */
             .top-meta {{ 
                 display: flex; justify-content: center; align-items: center; 
                 gap: 8px; margin-bottom: 12px; 
@@ -91,28 +88,24 @@ def create_html(news_list):
                 background-color: #ebf9f1; padding: 2px 8px; border-radius: 4px; 
                 border: 1px solid #d1e7dd; 
             }}
-            
-            /* 중간: 제목 */
             .title-area {{ text-align: center; margin-bottom: 15px; }}
             .news-title {{ 
                 text-decoration: none; color: #111; font-weight: bold; font-size: 1.1em; 
                 word-break: keep-all; line-height: 1.4; display: block;
             }}
-            
-            /* 하단: 원본 확인 🐭 (가운데 정렬 및 통합 링크) */
             .bottom-area {{ 
                 display: flex; justify-content: center; align-items: center; 
                 border-top: 1px dashed #e1eedd; padding-top: 12px;
             }}
             .origin-link {{
                 text-decoration: none; color: #fff; background-color: #27ae60; 
-                padding: 4px 12px; border-radius: 20px; font-weight: bold;
-                display: flex; align-items: center; gap: 4px;
-                font-size: 0.75em; /* PICK 태그와 동일한 크기 */
+                padding: 4px 14px; border-radius: 20px; font-weight: bold;
+                display: flex; align-items: center; gap: 6px;
+                font-size: 0.75em;
                 transition: background 0.2s;
             }}
             .origin-link:active {{ background-color: #1e8449; }}
-            .mouse-icon {{ font-size: 1.1em; }} /* 캐릭터 크기 조정 */
+            .mouse-icon {{ font-size: 1.1em; }}
             
             footer {{ margin-top: 40px; font-size: 0.8em; color: #999; text-align: center; }}
         </style>
@@ -127,7 +120,6 @@ def create_html(news_list):
                     <span class="designer">Designed by chipdory.hwang</span>
                 </div>
             </div>
-            
             <ul>
     """
     
@@ -162,6 +154,7 @@ def create_html(news_list):
     
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
+    print("✅ index.html 생성 완료")
     return html_content
 
 def send_email(html_body):
@@ -178,4 +171,12 @@ def send_email(html_body):
     try:
         with smtplib.SMTP('smtp.gmail.com', 587) as server:
             server.starttls()
-            server.login(email_user, email_
+            server.login(email_user, email_pass)
+            server.send_message(msg)
+    except: pass
+
+if __name__ == "__main__":
+    news_data = get_news()
+    full_html = create_html(news_data)
+    if news_data:
+        send_email(full_html)
