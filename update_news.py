@@ -65,8 +65,11 @@ def create_html(news_list):
     </html>
     """
     
-    with open("index.html", "w", encoding="utf-8") as f:
+    # [수정] 파일이 현재 실행 폴더에 확실히 저장되도록 경로 지정
+    file_path = os.path.join(os.getcwd(), "index.html")
+    with open(file_path, "w", encoding="utf-8") as f:
         f.write(html_content)
+    print(f"파일 생성 완료: {file_path}")
     return html_content
 
 def send_email(html_body):
