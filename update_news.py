@@ -83,7 +83,7 @@ def create_html(news_list):
             ul {{ list-style: none; padding: 0; margin-top: 25px; }}
             li {{ 
                 margin-bottom: 15px; padding: 18px; background: #fff; 
-                border: 2.5px solid #e1eedd; /* 테두리 굵기 강화 */
+                border: 2.5px solid #27ae60; /* 기사 박스 테두리를 진한 색으로 변경 */
                 border-radius: 12px; 
                 box-sizing: border-box;
             }}
@@ -109,18 +109,18 @@ def create_html(news_list):
                 display: flex; justify-content: center; align-items: center; 
                 border-top: 1px dashed #e1eedd; padding-top: 14px;
             }}
-            /* 원본 확인 버튼: 글자 초록, 타원 테두리 초록, 안쪽 흰색 */
+            /* 버튼 테두리를 기존의 연한 색으로, 글자색은 조금 더 밝은 초록으로 변경 */
             .origin-link {{
                 text-decoration: none; 
-                color: #27ae60; 
+                color: #2ecc71; 
                 background-color: #ffffff; 
-                border: 2px solid #27ae60; 
+                border: 2px solid #e1eedd; 
                 padding: 4px 14px; border-radius: 25px; font-weight: bold;
                 display: flex; align-items: center; gap: 6px;
                 font-size: 0.75em;
                 transition: all 0.2s;
             }}
-            .origin-link:active {{ background-color: #f0fdf4; opacity: 0.8; }}
+            .origin-link:active {{ background-color: #f9fdfa; opacity: 0.8; }}
             .mouse-icon {{ font-size: 1.1em; }}
             
             footer {{ margin-top: 40px; font-size: 0.8em; color: #999; text-align: center; }}
