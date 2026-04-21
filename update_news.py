@@ -21,7 +21,7 @@ def get_news():
         news_list = []
         
         items = soup.select('item')
-        for item in items[:12]: # 모바일 화면을 위해 12개로 소폭 조정
+        for item in items[:15]:
             full_title = item.title.text
             link = item.link.text
             
@@ -36,92 +36,107 @@ def get_news():
             news_list.append({'title': title, 'link': link, 'media': media})
         return news_list
     except Exception as e:
-        print(f"뉴스 수집 중 에러: {e}")
+        print(f"뉴스 수집 에러: {e}")
         return []
 
 def create_html(news_list):
-    now = (datetime.datetime.now() + datetime.timedelta(hours=9)).strftime('%m/%dd %H:%M')
+    now = (datetime.datetime.now() + datetime.timedelta(hours=9)).strftime('%Y-%m-%d %H:%M')
     
     html_content = f"""
     <!DOCTYPE html>
     <html lang="ko">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <style>
+            /* 전체 배경 및 기본 폰트 */
             body {{ 
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-                line-height: 1.4; color: #333; margin: 0; padding: 10px; background-color: #f4f9f6; 
-                -webkit-text-size-adjust: 100%;
+                font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
+                line-height: 1.5; color: #333; margin: 0; padding: 10px; 
+                background-color: #f0f7f4; -webkit-text-size-adjust: 100%;
             }}
+            /* 모바일 꽉 차는 컨테이너 */
             .container {{ 
-                background: #ffffff; padding: 15px 12px; border-radius: 10px; 
-                box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 5px solid #2ecc71; 
+                width: 100%; max-width: 600px; margin: 0 auto; box-sizing: border-box;
+                background: #ffffff; padding: 25px 15px; border-radius: 12px; 
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 8px solid #2ecc71; 
             }}
-            .header-section {{ text-align: center; margin-bottom: 15px; }}
+            
+            /* 모든 상단 문구 가운데 정렬 */
+            .header-section {{ text-align: center; margin-bottom: 25px; }}
             h1 {{ 
-                color: #27ae60; font-size: 1.4em; margin: 0; letter-spacing: -1px;
-                display: inline-block; border-bottom: 2px solid #2ecc71;
+                color: #27ae60; font-size: 1.6em; margin: 0; 
+                display: inline-block; border-bottom: 3px solid #2ecc71; padding-bottom: 5px; 
             }}
-            .sub-title {{ display: block; color: #666; font-size: 0.75em; margin-top: 4px; font-weight: bold; }}
-            .date-info {{ color: #999; font-size: 0.7em; margin-top: 5px; }}
+            .sub-title {{ display: block; color: #555; font-size: 0.9em; margin-top: 8px; font-weight: bold; }}
+            .date-group {{ margin-top: 15px; }}
+            .date {{ color: #7f8c8d; font-size: 0.85em; margin: 0; }}
+            .designer {{ font-size: 0.85em; color: #27ae60; font-weight: bold; display: block; margin-top: 3px; }}
             
-            ul {{ list-style: none; padding: 0; margin-top: 10px; }}
+            /* 뉴스 리스트 레이아웃 */
+            ul {{ list-style: none; padding: 0; margin-top: 25px; }}
             li {{ 
-                margin-bottom: 8px; padding: 10px; background: #fff; border: 1px solid #eef5f0; 
-                border-radius: 6px; display: block; transition: background 0.1s;
+                margin-bottom: 12px; padding: 15px; background: #fff; 
+                border: 1px solid #e1eedd; border-radius: 10px; 
+                display: flex; flex-direction: column; /* 세로 배치로 모바일 최적화 */
+                transition: all 0.2s ease; box-sizing: border-box;
             }}
-            li:active {{ background-color: #e8f5e9; }}
             
-            .title-area {{ display: flex; align-items: flex-start; margin-bottom: 4px; }}
-            .tag {{ 
-                background: #2ecc71; color: #fff; padding: 1px 5px; font-size: 0.65em; 
-                font-weight: bold; margin-right: 8px; border-radius: 3px; 
-                min-width: 32px; text-align: center; margin-top: 2px;
+            /* PICK 넘버링과 제목 영역 */
+            .top-area {{ display: flex; align-items: flex-start; margin-bottom: 8px; }}
+            .tag-box {{ 
+                background: #2ecc71; color: #fff; padding: 3px 8px; font-size: 0.75em; 
+                font-weight: bold; margin-right: 10px; border-radius: 4px; 
+                white-space: nowrap; flex-shrink: 0;
             }}
             .news-link {{ 
-                text-decoration: none; color: #222; font-weight: 500; font-size: 0.95em; 
-                word-break: keep-all; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+                text-decoration: none; color: #333; font-weight: 500; font-size: 1.05em; 
+                word-break: keep-all; line-height: 1.4;
             }}
             
-            .meta-area {{ display: flex; justify-content: flex-end; align-items: center; }}
+            /* 매체명 오른쪽 정렬 */
+            .bottom-area {{ display: flex; justify-content: flex-end; }}
             .media-name {{ 
-                font-size: 0.7em; color: #27ae60; font-weight: bold; 
-                background-color: #f0faf4; padding: 1px 6px; border-radius: 3px; 
+                font-size: 0.8em; color: #27ae60; font-weight: bold; 
+                background-color: #ebf9f1; padding: 2px 8px; border-radius: 4px; 
                 border: 1px solid #d1e7dd; 
             }}
             
-            footer {{ margin-top: 20px; font-size: 0.65em; color: #bbb; text-align: center; }}
+            footer {{ margin-top: 40px; font-size: 0.8em; color: #999; text-align: center; }}
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header-section">
-                <h1>Daily 부동산 Picks</h1>
-                <span class="sub-title">부동산/아파트/재개발 핵심 요약</span>
-                <div class="date-info">📅 {now} UPDATE | By chipdory</div>
+                <h1>Daily「부동산」Picks</h1>
+                <span class="sub-title">(부동산/아파트/재건축/재개발/토지)</span>
+                <div class="date-group">
+                    <p class="date">📅 {now} UPDATE</p>
+                    <span class="designer">Designed by chipdory.hwang</span>
+                </div>
             </div>
+            
             <ul>
     """
     
     if not news_list:
-        html_content += '<li style="text-align: center; font-size: 0.9em; color: #27ae60;">소식이 없습니다.</li>'
+        html_content += '<li style="text-align: center; color: #27ae60;">현재 새로운 소식을 수집 중입니다.</li>'
     else:
         for i, news in enumerate(news_list, 1):
             html_content += f"""
                 <li>
-                    <div class="title-area">
-                        <span class="tag">#{i}</span>
+                    <div class="top-area">
+                        <div class="tag-box">PICK-{i}</div>
                         <a href='{news['link']}' class="news-link" target='_blank'>{news['title']}</a>
                     </div>
-                    <div class="meta-area">
+                    <div class="bottom-area">
                         <span class="media-name">{news['media']}</span>
                     </div>
                 </li>\n"""
         
     html_content += """
             </ul>
-            <footer>© 2026 Daily 부동산 Picks</footer>
+            <footer>© 2026 Daily 부동산 Picks - All Rights Reserved.</footer>
         </div>
     </body>
     </html>
@@ -139,7 +154,7 @@ def send_email(html_body):
     msg = MIMEMultipart()
     msg['From'] = email_user
     msg['To'] = email_user
-    msg['Subject'] = f"🌿 [Picks] {datetime.date.today()} 부동산 리포트"
+    msg['Subject'] = f"🌿 [Daily 부동산 Picks] {datetime.date.today()} 리포트"
     msg.attach(MIMEText(html_body, 'html'))
     
     try:
