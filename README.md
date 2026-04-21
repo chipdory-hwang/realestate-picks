@@ -1,2 +1,2 @@
-Daily「부동산」Picks
+Daily「부동산」Picks : 
 부동산/아파트/재건축/재개발/토지
