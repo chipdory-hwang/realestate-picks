@@ -7,7 +7,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 def get_news():
-    # 부동산 관련 핵심 키워드 검색
     search_query = '부동산 OR 아파트 OR 재건축 OR 재개발 OR 토지'
     url = f"https://news.google.com/rss/search?q={search_query}&hl=ko&gl=KR&ceid=KR:ko"
     
@@ -51,19 +50,14 @@ def create_html(news_list):
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         
-        <!-- 파비콘 설정 (부동산 느낌 🏠) -->
         <link rel="icon" href="https://fav.farm/🏠" />
-        
         <title>Daily「부동산」Picks</title>
         
-        <!-- 공유 미리보기(OG) 설정 -->
         <meta name="description" content="{now_simple} 업데이트된 부동산 핵심 리포트">
         <meta property="og:type" content="website">
         <meta property="og:title" content="Daily「부동산」Picks">
         <meta property="og:description" content="{now_simple} 부동산/아파트/재개발 주요 소식 모음">
         <meta property="og:image" content="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Mouse%20Face.png">
-        <meta property="og:image:width" content="800">
-        <meta property="og:image:height" content="400">
 
         <style>
             body {{ 
@@ -89,7 +83,8 @@ def create_html(news_list):
             ul {{ list-style: none; padding: 0; margin-top: 25px; }}
             li {{ 
                 margin-bottom: 15px; padding: 18px; background: #fff; 
-                border: 1px solid #e1eedd; border-radius: 10px; 
+                border: 2.5px solid #e1eedd; /* 테두리 굵기 강화 */
+                border-radius: 12px; 
                 box-sizing: border-box;
             }}
             .top-meta {{ 
@@ -112,16 +107,20 @@ def create_html(news_list):
             }}
             .bottom-area {{ 
                 display: flex; justify-content: center; align-items: center; 
-                border-top: 1px dashed #e1eedd; padding-top: 12px;
+                border-top: 1px dashed #e1eedd; padding-top: 14px;
             }}
+            /* 원본 확인 버튼: 글자 초록, 타원 테두리 초록, 안쪽 흰색 */
             .origin-link {{
-                text-decoration: none; color: #fff; background-color: #27ae60; 
-                padding: 4px 14px; border-radius: 20px; font-weight: bold;
+                text-decoration: none; 
+                color: #27ae60; 
+                background-color: #ffffff; 
+                border: 2px solid #27ae60; 
+                padding: 4px 14px; border-radius: 25px; font-weight: bold;
                 display: flex; align-items: center; gap: 6px;
                 font-size: 0.75em;
-                transition: background 0.2s;
+                transition: all 0.2s;
             }}
-            .origin-link:active {{ background-color: #1e8449; }}
+            .origin-link:active {{ background-color: #f0fdf4; opacity: 0.8; }}
             .mouse-icon {{ font-size: 1.1em; }}
             
             footer {{ margin-top: 40px; font-size: 0.8em; color: #999; text-align: center; }}
@@ -171,7 +170,6 @@ def create_html(news_list):
     
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
-    print("✅ index.html 생성 완료 (Favicon: 🏠)")
     return html_content
 
 def send_email(html_body):
