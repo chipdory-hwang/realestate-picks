@@ -75,7 +75,7 @@ def create_html(news_list):
                 margin-bottom: 10px; padding: 12px; background: #fff; border: 1px solid #e1eedd; 
                 border-radius: 8px; display: flex; flex-direction: column; transition: background 0.2s;
             }}
-            li:active {{ background-color: #f0fdf4; }} /* 모바일 터치 피드백 */
+            li:active {{ background-color: #f0fdf4; }}
             
             .left-group {{ display: flex; align-items: flex-start; margin-bottom: 6px; }}
             .tag-box {{ 
@@ -88,9 +88,7 @@ def create_html(news_list):
                 word-break: keep-all; flex: 1; line-height: 1.4;
             }}
             
-            .media-info {{
-                display: flex; justify-content: flex-end; align-items: center;
-            }}
+            .media-info {{ display: flex; justify-content: flex-end; align-items: center; }}
             .media-name {{ 
                 font-size: 0.75em; color: #27ae60; font-weight: bold; 
                 background-color: #ebf9f1; padding: 2px 8px; border-radius: 4px; 
@@ -129,3 +127,38 @@ def create_html(news_list):
                 </li>\n"""
         
     html_content += """
+            </ul>
+            <footer>© 2026 Daily 부동산 Picks<br>All Rights Reserved.</footer>
+        </div>
+    </body>
+    </html>
+    """
+    
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(html_content)
+    print("✅ index.html 생성 완료")
+    return html_content
+
+def send_email(html_body):
+    email_user = os.environ.get('EMAIL_USER')
+    email_pass = os.environ.get('EMAIL_PASS')
+    if not email_user or not email_pass: return
+
+    msg = MIMEMultipart()
+    msg['From'] = email_user
+    msg['To'] = email_user
+    msg['Subject'] = f"🌿 [Daily 부동산 Picks] {datetime.date.today()} 리포트"
+    msg.attach(MIMEText(html_body, 'html'))
+    
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(email_user, email_pass)
+            server.send_message(msg)
+    except: pass
+
+if __name__ == "__main__":
+    news_data = get_news()
+    create_html(news_data)
+    if news_data:
+        send_email(create_html(news_data))
