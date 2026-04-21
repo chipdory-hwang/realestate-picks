@@ -6,7 +6,9 @@ on:
   workflow_dispatch: # 수동 실행 버튼
 
 permissions:
-  contents: write # 브랜치 생성을 위한 쓰기 권한 명시
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -37,4 +39,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
           publish_branch: gh-pages
-          force_orphan: true # 브랜치가 없으면 강제로 새로 생성
+          force_orphan: true
