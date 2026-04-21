@@ -1,120 +1,102 @@
-import feedparser
+import requests
+from bs4 import BeautifulSoup
 import datetime
-import ssl
-import smtplib
 import os
-import sys
+import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-# 인코딩 및 SSL 설정
-if sys.stdout.encoding != 'utf-8':
-    sys.stdout.reconfigure(encoding='utf-8')
-ssl._create_default_https_context = ssl._create_unverified_context
-
-def get_seoul_time():
-    now_utc = datetime.datetime.now(datetime.timezone.utc)
-    kor_timezone = datetime.timezone(datetime.timedelta(hours=9))
-    return now_utc.astimezone(kor_timezone).strftime("%Y.%m.%d %H:%M")
-
-def fetch_real_estate_news():
-    query = "부동산 OR 아파트 OR 재건축 OR 재개발 OR 신도시 OR 토지"
-    url = f"https://news.google.com/rss/search?q={query}&hl=ko&gl=KR&ceid=KR:ko"
-    feed = feedparser.parse(url)
-    all_news = []
-    
-    for entry in feed.entries[:10]:
-        title, media = entry.title, "부동산 소식"
-        if " - " in entry.title:
-            title, media = entry.title.rsplit(" - ", 1)
-        all_news.append({
-            "media": media.strip(),
-            "title": title.strip(),
-            "link": entry.link
-        })
-    return all_news
-
-def create_html(news_data):
-    today = get_seoul_time()
-    html_content = f"""
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily 부동산 Picks</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        body {{ background: #f4f7f6; font-family: 'Pretendard', sans-serif; color: #333; }}
-        .header {{ text-align: center; padding: 45px 20px; background: #fff; border-bottom: 1px solid #eee; margin-bottom: 30px; }}
-        .header h2 {{ font-weight: 900; color: #111; margin-bottom: 10px; text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 3px; text-decoration-color: #e67e22; }}
-        .category {{ font-weight: 700; font-size: 0.95rem; color: #444; margin-bottom: 15px; }}
-        .update-info {{ font-size: 0.85rem; color: #777; margin-bottom: 3px; }}
-        .designer {{ font-size: 0.85rem; color: #e67e22; font-weight: 600; }}
-        .news-grid {{ max-width: 600px; margin: 0 auto; padding: 0 15px 60px; }}
-        .news-card {{ background: #fff; border-radius: 14px; margin-bottom: 18px; box-shadow: 0 3px 12px rgba(0,0,0,0.06); overflow: hidden; border: 1px solid #eee; text-decoration: none; display: block; color: inherit; }}
-        .card-table {{ width: 100%; border-collapse: collapse; }}
-        .row-top {{ background: #fcfcfc; border-bottom: 1px solid #f0f0f0; }}
-        .cell-num {{ width: 55px; text-align: center; font-weight: 900; color: #e67e22; font-size: 1.15rem; padding: 12px 0; }}
-        .cell-media {{ padding: 12px 10px; font-weight: 700; color: #555; font-size: 0.9rem; }}
-        .row-content {{ padding: 20px; }}
-        .card-title {{ font-size: 1.15rem; font-weight: 800; color: #111; line-height: 1.5; margin-bottom: 15px; }}
-        .link-btn {{ color: #e67e22; font-weight: 700; font-size: 0.95rem; border-top: 1px solid #f1f1f1; padding-top: 12px; text-align: right; }}
-    </style>
-</head>
-<body>
-    <header class="header">
-        <h2>Daily「부동산」Picks</h2>
-        <div class="category">부동산 / 아파트 / 재건축·재개발 / 신도시 / 토지</div>
-        <p class="update-info">최종 업데이트: {today}</p>
-        <p class="designer">Designed by chipdory.hwang</p>
-    </header>
-    <div class="news-grid">
-    """
-    for i, news in enumerate(news_data):
-        html_content += f"""
-        <a href="{news['link']}" target="_blank" class="news-card">
-            <table class="card-table">
-                <tr class="row-top">
-                    <td class="cell-num">{i+1:02d}</td>
-                    <td class="cell-media">{news['media']}</td>
-                </tr>
-            </table>
-            <div class="row-content">
-                <div class="card-title">{news['title']}</div>
-                <div class="link-btn">원본확인 🖱️</div>
-            </div>
-        </a>
-        """
-    html_content += "</div></body></html>"
-    return html_content
-
-def send_email(content):
-    sender = os.environ.get('EMAIL_USER')
-    password = os.environ.get('EMAIL_PASS')
-    if not sender or not password:
-        print("이메일 설정이 누락되었습니다.")
-        return
-        
-    msg = MIMEMultipart()
-    msg['Subject'] = f"[Daily 부동산 Picks] {get_seoul_time()} 리포트"
-    msg['From'] = f"부동산 브리핑 봇 <{sender}>"
-    msg['To'] = "chipdory@gmail.com"
-    msg.attach(MIMEText(content, 'html'))
+def get_news():
+    # 네이버 부동산 뉴스 (주요 뉴스)
+    url = "https://land.naver.com/news/main.naver"
+    headers = {'User-Agent': 'Mozilla/5.0'}
     
     try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(sender, password)
+        res = requests.get(url, headers=headers)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        news_list = []
+        
+        # 주요 뉴스 리스트 추출
+        items = soup.select('.news_list li')[:10] # 상위 10개
+        for item in items:
+            title = item.select_one('dt:not(.photo) a').text.strip()
+            link = "https://land.naver.com" + item.select_one('dt:not(.photo) a')['href']
+            news_list.append({'title': title, 'link': link})
+        return news_list
+    except Exception as e:
+        print(f"뉴스 수집 중 에러 발생: {e}")
+        return []
+
+def create_html(news_list):
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+    
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>오늘의 부동산 뉴스</title>
+        <style>
+            body {{ font-family: 'Malgun Gothic', sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }}
+            h1 {{ color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 10px; }}
+            .date {{ color: #666; font-size: 0.9em; }}
+            ul {{ list-style: none; padding: 0; }}
+            li {{ margin-bottom: 15px; padding: 10px; border: 1px solid #eee; border-radius: 5px; }}
+            a {{ text-decoration: none; color: #2c3e50; font-weight: bold; }}
+            a:hover {{ color: #e67e22; }}
+        </style>
+    </head>
+    <body>
+        <h1>🏠 오늘의 부동산 주요 뉴스</h1>
+        <p class="date">업데이트 시간: {now}</p>
+        <ul>
+    """
+    
+    for news in news_list:
+        html_content += f"<li><a href='{news['link']}' target='_blank'>{news['title']}</a></li>\n"
+        
+    html_content += """
+        </ul>
+        <footer style="margin-top: 30px; font-size: 0.8em; color: #999;">
+            본 리포트는 네이버 부동산 뉴스를 기반으로 자동 생성되었습니다.
+        </footer>
+    </body>
+    </html>
+    """
+    
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(html_content)
+    return html_content
+
+def send_email(html_body):
+    email_user = os.environ.get('EMAIL_USER')
+    email_pass = os.environ.get('EMAIL_PASS')
+    
+    if not email_user or not email_pass:
+        print("이메일 설정(Secrets)이 되어있지 않아 메일 발송을 건너뜁니다.")
+        return
+
+    msg = MIMEMultipart()
+    msg['From'] = email_user
+    msg['To'] = email_user # 나에게 보내기
+    msg['Subject'] = f"🏠 [부동산 뉴스] {datetime.date.today()} 리포트"
+    
+    msg.attach(MIMEText(html_body, 'html'))
+    
+    try:
+        with smtplib.SMTP_HOST('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(email_user, email_pass)
             server.send_message(msg)
-            print("메일 발송 성공!")
+        print("메일 발송 성공!")
     except Exception as e:
         print(f"메일 발송 실패: {e}")
 
 if __name__ == "__main__":
-    news = fetch_real_estate_news()
-    if news:
-        html = create_html(news)
-        with open("index.html", "w", encoding="utf-8") as f:
-            f.write(html)
-        send_email(html)
+    news_data = get_news()
+    if news_data:
+        html_text = create_html(news_data)
+        send_email(html_text)
+    else:
+        print("수집된 뉴스가 없어 작업을 중단합니다.")
