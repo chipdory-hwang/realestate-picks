@@ -4,7 +4,7 @@ on:
   schedule:
     # 한국 시간(KST) 오전 5시 18분 = UTC 20시 18분
     - cron: '18 20 * * *'
-  workflow_dispatch: # 수동 실행 버튼
+  workflow_dispatch:
 
 permissions:
   contents: write
